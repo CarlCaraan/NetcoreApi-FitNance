@@ -118,7 +118,91 @@ namespace FitNance.Controllers.Profile
         }
 
 
+        // ==========================================
+        // UPDATE PROFILE
+        // ==========================================
+        [HttpPut("{userProfileId}")]
+        public async Task<IActionResult> UpdateProfile(string userProfileId, [FromBody] UpdateProfileRequest request)
+        {
+            try
+            {
+                // ==========================================
+                // FIND PROFILE
+                // ==========================================
+                var profile = await _context.UserProfiles
+                    .FirstOrDefaultAsync(x => x.UserProfileId == userProfileId);
 
+                // ==========================================
+                // PROFILE NOT FOUND
+                // ==========================================
+                if (profile == null)
+                {
+                    return NotFound(new
+                    {
+                        message = "Profile not found.",
+                        userProfileId
+                    });
+                }
+
+                // ==========================================
+                // UPDATE PROFILE FIELDS
+                // ==========================================
+
+                profile.Birthdate = request.Birthdate;
+                profile.Age = request.Age;
+                profile.Gender = request.Gender;
+
+                profile.Height = request.Height;
+                profile.Weight = request.Weight;
+                profile.CurrentBMI = request.CurrentBMI;
+
+                profile.ActivityLevelId = request.ActivityLevelId;
+                profile.FitnessGoalId = request.FitnessGoalId;
+
+                profile.MonthlyIncome = request.MonthlyIncome;
+                profile.SavingsGoal = request.SavingsGoal;
+                profile.CurrentSavings = request.CurrentSavings;
+
+                profile.TargetCalories = request.TargetCalories;
+                profile.TargetProtein = request.TargetProtein;
+                profile.TargetCarbs = request.TargetCarbs;
+                profile.TargetFat = request.TargetFat;
+
+                profile.FirstName = request.FirstName;
+                profile.MiddleName = request.MiddleName;
+                profile.LastName = request.LastName;
+
+                // ==========================================
+                // MODIFIED INFORMATION
+                // ==========================================
+                profile.ModifiedBy = userProfileId;
+                profile.ModifiedDate = DateTime.Now;
+
+                // ==========================================
+                // SAVE CHANGES
+                // ==========================================
+                await _context.SaveChangesAsync();
+
+                // ==========================================
+                // RESPONSE
+                // ==========================================
+                var response = new UpdateProfileResponse
+                {
+                    Message = "Profile updated successfully.",
+                    UserProfileId = profile.UserProfileId
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while updating profile.",
+                    error = ex.Message
+                });
+            }
+        }
 
 
 
