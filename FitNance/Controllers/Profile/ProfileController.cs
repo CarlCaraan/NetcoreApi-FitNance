@@ -1,15 +1,16 @@
 ﻿using FitNance.Data;
+using FitNance.Models.Profile;
+using FitNance.Models.ProfileSetup;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using FitNance.Models.ProfileSetup;
 using Microsoft.EntityFrameworkCore;
 
 namespace FitNance.Controllers.Profile
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    //[Authorize]
     public class ProfileController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -65,5 +66,61 @@ namespace FitNance.Controllers.Profile
 
             return Ok(profile);
         }
+
+
+        // ==========================================
+        // COMPUTE PROFILE TARGETS
+        // ==========================================
+        [HttpPost("computeTargets")]
+        public async Task<IActionResult> ComputeTargets(
+            [FromBody] ProfileComputeRequest request)
+        {
+            try
+            {
+                var result = await _context.Database
+                    .SqlQueryRaw<ProfileComputeResult>(
+                        """
+                        EXEC PROC_ProfileSetupResult
+                            @Birthdate,
+                            @Gender,
+                            @Height,
+                            @Weight,
+                            @ActivityLevelId,
+                            @GoalId
+                        """,
+                        new SqlParameter("@Birthdate", request.BirthDate),
+                        new SqlParameter("@Gender", request.Gender),
+                        new SqlParameter("@Height", request.Height),
+                        new SqlParameter("@Weight", request.Weight),
+                        new SqlParameter("@ActivityLevelId", request.ActivityLevelId),
+                        new SqlParameter("@GoalId", request.GoalId)
+                    )
+                    .ToListAsync();
+
+                if (result.Count == 0)
+                {
+                    return NotFound(new
+                    {
+                        message = "Unable to compute profile targets."
+                    });
+                }
+
+                return Ok(result.First());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while computing profile targets.",
+                    error = ex.Message
+                });
+            }
+        }
+
+
+
+
+
+
     }
 }
