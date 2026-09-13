@@ -1,0 +1,6 @@
+@FitNance_HostAddress = http://localhost:5190
+
+GET {{FitNance_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
