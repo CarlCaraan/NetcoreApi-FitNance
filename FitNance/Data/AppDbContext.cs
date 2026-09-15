@@ -1,6 +1,7 @@
 ﻿using FitNance.Models.Authentication;
 using FitNance.Models.ProfileSetup;
 using FitNance.Models.Setup;
+using FitNance.Models.Food;
 using Microsoft.EntityFrameworkCore;
 
 namespace FitNance.Data
@@ -17,6 +18,7 @@ namespace FitNance.Data
         public DbSet<ProfileSetupResultModel> ProfileSetupResults { get; set; }
         public DbSet<UserProfileModel> UserProfiles { get; set; }
         public DbSet<UserThemeModel> UserThemes { get; set; }
+        public DbSet<MasterFoodModel> MasterFoods { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
