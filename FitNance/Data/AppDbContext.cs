@@ -12,9 +12,16 @@ namespace FitNance.Data
             : base(options)
         {
         }
-        public DbSet<UserLoginModel> UserLogin { get; set; }
+
+        //SETUPs
         public DbSet<ActivityLevelModel> ActivityLevels { get; set; }
         public DbSet<NutritionGoalsModel> NutritionGoals { get; set; }
+        public DbSet<ServingUnitModel> ServingUnits { get; set; }
+
+
+
+
+        public DbSet<UserLoginModel> UserLogin { get; set; }
         public DbSet<ProfileSetupResultModel> ProfileSetupResults { get; set; }
         public DbSet<UserProfileModel> UserProfiles { get; set; }
         public DbSet<UserThemeModel> UserThemes { get; set; }
