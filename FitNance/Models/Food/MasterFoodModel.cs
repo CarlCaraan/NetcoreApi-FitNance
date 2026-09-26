@@ -57,6 +57,7 @@ namespace FitNance.Models.Food
         [Column(TypeName = "varchar(150)")]
         public string? UserId { get; set; }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column(TypeName = "numeric")]
         public decimal Rowstamp { get; set; }
     }

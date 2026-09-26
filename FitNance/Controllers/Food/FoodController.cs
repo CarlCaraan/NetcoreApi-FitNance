@@ -82,5 +82,43 @@ namespace FitNance.Controllers.Food
                 PageSize = pageSize
             });
         }
+
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> AddFood([FromBody] MasterFoodModel food)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var userId = User.FindFirst(ClaimTypes.Name)?.Value; //username
+
+            var lastFoodId = await _context.MasterFoods
+                .Where(x => x.FoodId != null && x.FoodId.StartsWith("FD"))
+                .OrderByDescending(x => x.FoodId)
+                .Select(x => x.FoodId)
+                .FirstOrDefaultAsync();
+
+            int nextNumber = 1;
+
+            if (!string.IsNullOrWhiteSpace(lastFoodId) && int.TryParse(lastFoodId.Substring(2), out int lastNumber))
+                nextNumber = lastNumber + 1;
+
+            food.FoodId = $"FD{nextNumber:D6}";
+            food.CreatedBy = userId;
+            food.CreatedDate = DateTime.Now;
+            food.ModifiedBy = null;
+            food.ModifiedDate = null;
+            food.UserId = userId;
+
+            _context.MasterFoods.Add(food);
+            await _context.SaveChangesAsync();
+
+            return Ok(food);
+
+        }
+
+
+
     }
 }
