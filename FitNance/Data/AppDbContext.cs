@@ -17,6 +17,7 @@ namespace FitNance.Data
         public DbSet<ActivityLevelModel> ActivityLevels { get; set; }
         public DbSet<NutritionGoalsModel> NutritionGoals { get; set; }
         public DbSet<ServingUnitModel> ServingUnits { get; set; }
+        public DbSet<FoodCategoryModel> FoodCategories { get; set; }
 
 
 

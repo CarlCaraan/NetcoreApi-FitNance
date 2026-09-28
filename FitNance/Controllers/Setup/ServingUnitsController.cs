@@ -12,11 +12,11 @@ namespace FitNance.Controllers.Setup
         [Authorize]
         [ApiController]
         [Route("api/[controller]")]
-        public class ServingUnitController : ControllerBase
+        public class ServingUnitsController : ControllerBase
         {
             private readonly AppDbContext _context;
 
-            public ServingUnitController(AppDbContext context)
+            public ServingUnitsController(AppDbContext context)
             {
                 _context = context;
             }
