@@ -23,6 +23,9 @@
 
   <ItemGroup>
     <Compile Remove="FitNance.Tests\**\*.cs" />
+    <Content Remove="FitNance.Tests\**" />
+    <EmbeddedResource Remove="FitNance.Tests\**" />
+    <None Remove="FitNance.Tests\**" />
   </ItemGroup>
 
 </Project>
