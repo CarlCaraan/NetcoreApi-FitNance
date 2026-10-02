@@ -72,7 +72,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AngularPolicy", policy =>
     {
         policy
-            .WithOrigins("https://fitnance-api-htftetb5h5b5fyf7.southeastasia-01.azurewebsites.net")
+            .WithOrigins("https://zealous-plant-0ec67dc10.6.azurestaticapps.net")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
