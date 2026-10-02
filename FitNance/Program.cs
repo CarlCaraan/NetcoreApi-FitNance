@@ -1,5 +1,6 @@
 using FitNance.Data;
 using FitNance.Models.Authentication;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Authentication.JwtBearer; //JWT
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -71,13 +72,38 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AngularPolicy", policy =>
     {
         policy
-            .WithOrigins("http://localhost:4200")
+            .WithOrigins("https://fitnance-api-htftetb5h5b5fyf7.southeastasia-01.azurewebsites.net")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
 });
 
 var app = builder.Build();
+
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+        var logger = context.RequestServices
+            .GetRequiredService<ILoggerFactory>()
+            .CreateLogger("FitNance.UnhandledException");
+
+        logger.LogError(
+            exception,
+            "Unhandled exception for {Method} {Path}. TraceId: {TraceId}",
+            context.Request.Method,
+            context.Request.Path,
+            context.TraceIdentifier);
+
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        await context.Response.WriteAsJsonAsync(new
+        {
+            message = "An unexpected server error occurred.",
+            traceId = context.TraceIdentifier
+        });
+    });
+});
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
