@@ -71,8 +71,16 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AngularPolicy", policy =>
     {
+        if (builder.Environment.IsDevelopment())
+        {
+            policy.WithOrigins("http://localhost:4200");
+        }
+        else
+        {
+            policy.WithOrigins("https://zealous-plant-0ec67dc10.6.azurestaticapps.net");
+        }
+
         policy
-            .WithOrigins("https://zealous-plant-0ec67dc10.6.azurestaticapps.net")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
