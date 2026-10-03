@@ -21,7 +21,11 @@ namespace FitNance.Controllers.Food
 
 
         [HttpGet]
-        public async Task<IActionResult> GetFoods(int pageNumber = 1, int pageSize = 30, string? search = null)
+        public async Task<IActionResult> GetFoods(
+          int pageNumber = 1,
+          int pageSize = 30,
+          string? search = null,
+          string source = "all")
         {
             // ==========================================
             // GET USERNAME FROM JWT
@@ -39,22 +43,45 @@ namespace FitNance.Controllers.Food
             // ==========================================
             // VALIDATE PAGINATION
             // ==========================================
-            if (pageNumber < 1) pageNumber = 1;
-            if (pageSize < 1 || pageSize > 100) pageSize = 30;
+            if (pageNumber < 1)
+                pageNumber = 1;
+
+            if (pageSize < 1 || pageSize > 100)
+                pageSize = 30;
 
             // ==========================================
-            // GET DEFAULT + USER FOODS
+            // GET FOOD QUERY
             // ==========================================
             var query = _context.MasterFoods
                 .AsNoTracking()
-                .Where(x => x.UserId == "D" || x.UserId == userId);
+                .AsQueryable();
+
+            // ==========================================
+            // FOOD SOURCE FILTER
+            // ==========================================
+            if (source == "system")
+            {
+                // System Default Foods
+                query = query.Where(x => x.UserId == "D");
+            }
+            else if (source == "user")
+            {
+                // Foods created by logged-in user
+                query = query.Where(x => x.UserId == userId);
+            }
+            else
+            {
+                // All Foods
+                query = query.Where(x => x.UserId == "D" || x.UserId == userId);
+            }
 
             // ==========================================
             // SEARCH
             // ==========================================
             if (!string.IsNullOrWhiteSpace(search))
             {
-                query = query.Where(x => x.FoodName.Contains(search));
+                query = query.Where(x =>
+                    x.FoodName.Contains(search));
             }
 
             // ==========================================
@@ -82,7 +109,6 @@ namespace FitNance.Controllers.Food
                 PageSize = pageSize
             });
         }
-
 
         [HttpPost]
         [Authorize]
@@ -117,6 +143,35 @@ namespace FitNance.Controllers.Food
             return Ok(food);
 
         }
+
+
+
+        [HttpDelete]
+        [Authorize]
+        public async Task<IActionResult> DeleteFood([FromBody] List<string> foodIds)
+        {
+            if (foodIds == null || foodIds.Count == 0)
+                return BadRequest("No food selected.");
+
+            var userId = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            var foods = await _context.MasterFoods
+                .Where(x => foodIds.Contains(x.FoodId) && x.UserId == userId)
+                .ToListAsync();
+
+            if (foods.Count == 0)
+                return NotFound("No user-owned foods found.");
+
+            _context.MasterFoods.RemoveRange(foods);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = $"{foods.Count} food(s) deleted successfully.",
+                deletedCount = foods.Count
+            });
+        }
+
 
 
 
