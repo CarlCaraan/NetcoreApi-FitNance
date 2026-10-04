@@ -12,23 +12,60 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      # ==========================================
+      # CHECKOUT
+      # ==========================================
+      - name: Checkout
+        uses: actions/checkout@v4
 
+      # ==========================================
+      # SETUP .NET
+      # ==========================================
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.x'
+          dotnet-version: "10.x"
 
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
+      # ==========================================
+      # RESTORE
+      # ==========================================
+      - name: Restore
+        run: dotnet restore FitNance/FitNance/FitNance.csproj
 
+      # ==========================================
+      # BUILD
+      # ==========================================
+      - name: Build
+        run: dotnet build FitNance/FitNance/FitNance.csproj --no-restore --configuration Release
+
+      # ==========================================
+      # INSTALL EF CORE CLI
+      # ==========================================
+      - name: Install EF Core CLI
+        run: dotnet tool install --global dotnet-ef
+
+      # ==========================================
+      # EF CORE MIGRATION
+      # ==========================================
+      - name: Run EF Core Migration
+        env:
+          ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
+        run: dotnet ef database update --project FitNance/FitNance/FitNance.csproj
+
+      # ==========================================
+      # PUBLISH
+      # ==========================================
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        run: dotnet publish FitNance/FitNance/FitNance.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
+      # ==========================================
+      # UPLOAD ARTIFACT
+      # ==========================================
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -38,16 +75,23 @@ jobs:
   deploy:
     runs-on: windows-latest
     needs: build
+
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
+      # ==========================================
+      # DOWNLOAD ARTIFACT
+      # ==========================================
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-      
+
+      # ==========================================
+      # LOGIN TO AZURE
+      # ==========================================
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -55,11 +99,13 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_76D8DF0CBFF244D38E8047AE84B32BB4 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_9C4C570042BD4F4886BC1A471228F006 }}
 
+      # ==========================================
+      # DEPLOY TO AZURE APP SERVICE
+      # ==========================================
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'fitnance-api'
-          slot-name: 'Production'
+          app-name: "fitnance-api"
+          slot-name: "Production"
           package: .
-          
