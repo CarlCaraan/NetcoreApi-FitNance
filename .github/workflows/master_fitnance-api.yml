@@ -9,12 +9,19 @@ on:
       - master
   workflow_dispatch:
 
+# ==========================================
+# WORKFLOW PERMISSIONS
+# ==========================================
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
+  # ==========================================
+  # BUILD JOB
+  # ==========================================
   build:
     runs-on: windows-latest
-
-    permissions:
-      contents: read
 
     steps:
       # ==========================================
@@ -87,13 +94,12 @@ jobs:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
+  # ==========================================
+  # DEPLOY JOB
+  # ==========================================
   deploy:
     runs-on: windows-latest
     needs: build
-
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
       # ==========================================
