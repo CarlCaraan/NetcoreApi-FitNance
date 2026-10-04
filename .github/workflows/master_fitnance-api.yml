@@ -35,13 +35,13 @@ jobs:
       # RESTORE
       # ==========================================
       - name: Restore
-        run: dotnet restore FitNance/FitNance/FitNance.csproj
+        run: dotnet restore FitNance.csproj
 
       # ==========================================
       # BUILD
       # ==========================================
       - name: Build
-        run: dotnet build FitNance/FitNance/FitNance.csproj --no-restore --configuration Release
+        run: dotnet build FitNance.csproj --no-restore --configuration Release
 
       # ==========================================
       # INSTALL EF CORE CLI
@@ -55,13 +55,13 @@ jobs:
       - name: Run EF Core Migration
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
-        run: dotnet ef database update --project FitNance/FitNance/FitNance.csproj
+        run: dotnet ef database update --project FitNance.csproj
 
       # ==========================================
       # PUBLISH
       # ==========================================
       - name: dotnet publish
-        run: dotnet publish FitNance/FitNance/FitNance.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        run: dotnet publish FitNance.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
       # ==========================================
       # UPLOAD ARTIFACT
