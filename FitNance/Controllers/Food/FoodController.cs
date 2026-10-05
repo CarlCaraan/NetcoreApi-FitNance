@@ -145,6 +145,61 @@ namespace FitNance.Controllers.Food
         }
 
 
+        [HttpPut("{foodId}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateFood(string foodId, [FromBody] MasterFoodModel food)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var userId = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized();
+
+            // ==========================================
+            // FIND EXISTING FOOD
+            // ==========================================
+            var existingFood = await _context.MasterFoods
+                .FirstOrDefaultAsync(x => x.FoodId == foodId && x.UserId == userId);
+
+            if (existingFood == null)
+                return NotFound(new { message = "Food not found." });
+
+            // ==========================================
+            // UPDATE FOOD
+            // ==========================================
+            existingFood.FoodName = food.FoodName;
+            existingFood.Category = food.Category;
+            existingFood.ServingSize = food.ServingSize;
+            existingFood.ServingUnit = food.ServingUnit;
+            existingFood.ServingGrams = food.ServingGrams;
+            existingFood.Calories = food.Calories;
+            existingFood.Protein = food.Protein;
+            existingFood.Carbs = food.Carbs;
+            existingFood.Fat = food.Fat;
+            existingFood.Fiber = food.Fiber;
+            existingFood.Sodium = food.Sodium;
+            existingFood.Sugar = food.Sugar;
+            existingFood.Cholesterol = food.Cholesterol;
+            existingFood.IsCanned = food.IsCanned;
+            existingFood.IsFastFood = food.IsFastFood;
+
+            // ==========================================
+            // UPDATE AUDIT FIELDS
+            // ==========================================
+            existingFood.ModifiedBy = userId;
+            existingFood.ModifiedDate = DateTime.Now;
+
+            // ==========================================
+            // SAVE CHANGES
+            // ==========================================
+            await _context.SaveChangesAsync();
+
+            return Ok(existingFood);
+        }
+
+
 
         [HttpDelete]
         [Authorize]
