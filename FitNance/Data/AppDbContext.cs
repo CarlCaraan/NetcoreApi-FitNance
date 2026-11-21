@@ -36,6 +36,12 @@ namespace FitNance.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<MealPlanDetail>(detail =>
+            {
+                detail.Property(item => item.MealPlanDetailId).IsRequired();
+                detail.HasIndex(item => item.MealPlanDetailId).IsUnique();
+            });
+
             modelBuilder.Entity<MealPlanHeader>()
                 .HasMany(plan => plan.Details)
                 .WithOne()
