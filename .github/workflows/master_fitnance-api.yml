@@ -4,9 +4,9 @@
 name: Build and deploy ASP.Net Core app to Azure Web App - fitnance-api
 
 on:
-  push:
-    branches:
-      - master
+  # push:
+  #   branches:
+  #     - master
   workflow_dispatch:
 
 # ==========================================
@@ -21,6 +21,7 @@ jobs:
   # BUILD JOB
   # ==========================================
   build:
+    if: github.event_name == 'push'
     runs-on: windows-latest
 
     steps:
