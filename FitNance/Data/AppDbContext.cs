@@ -1,7 +1,8 @@
-﻿using FitNance.Models.Authentication;
+using FitNance.Models.Authentication;
 using FitNance.Models.ProfileSetup;
 using FitNance.Models.Setup;
 using FitNance.Models.Food;
+using FitNance.Models.MealPlan;
 using Microsoft.EntityFrameworkCore;
 
 namespace FitNance.Data
@@ -28,9 +29,19 @@ namespace FitNance.Data
         public DbSet<UserThemeModel> UserThemes { get; set; }
         public DbSet<MasterFoodModel> MasterFoods { get; set; }
 
+        public DbSet<MealPlanHeader> MealPlans => Set<MealPlanHeader>();
+        public DbSet<MealPlanDetail> MealPlanDetails => Set<MealPlanDetail>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<MealPlanHeader>()
+                .HasMany(plan => plan.Details)
+                .WithOne()
+                .HasPrincipalKey(plan => plan.MealPlanId)
+                .HasForeignKey(detail => detail.MealPlanId)
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             modelBuilder.Entity<ProfileSetupResultModel>().HasNoKey(); // Para lang malaman ni EF Core na yung result ay hindi actual table at wag na hanapan ng Primary Key
         }
